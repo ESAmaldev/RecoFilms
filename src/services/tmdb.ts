@@ -73,8 +73,12 @@ export async function fetchMovieDetails(movieId: number) {
   return api(`/movie/${movieId}`);
 }
 
+export async function fetchWatchProviders(movieId: number) {
+  return api(`/movie/${movieId}/watch/providers`);
+}
+
 export function posterPath(path?: string) {
   return path ? IMG_BASE + path : undefined;
 }
 
-export default { fetchPopular, fetchMovieRecommendations, fetchSearch, posterPath };
+export default { fetchPopular, fetchMovieRecommendations, fetchSearch, fetchMovieDetails, fetchWatchProviders, posterPath };

@@ -23,8 +23,6 @@ export default function MovieCard({ movie, favorited, onToggleFavorite, selectab
     }
   }, [movie.id, imdbId]);
 
-  const imdbLink = imdbId ? `https://www.imdb.com/title/${imdbId}` : null;
-
   return (
     <div className="movie-card">
       <div className="movie-poster-wrap">
@@ -32,13 +30,9 @@ export default function MovieCard({ movie, favorited, onToggleFavorite, selectab
       </div>
       <div className="movie-info">
         <div className="movie-title" title={movie.title}>
-          {imdbLink ? (
-            <a href={imdbLink} target="_blank" rel="noopener noreferrer">
-              {movie.title}
-            </a>
-          ) : (
-            movie.title
-          )}
+          <a href={`#/movie/${movie.id}`} onClick={() => { /* hash navigation */ }}>
+            {movie.title}
+          </a>
         </div>
         <div className="movie-year">{movie.release_date?.slice(0, 4)}</div>
         <div className="movie-actions">
@@ -47,6 +41,11 @@ export default function MovieCard({ movie, favorited, onToggleFavorite, selectab
               {favorited ? '★ Favorited' : '☆ Favorite'}
             </button>
           )}
+        {imdbId && (
+          <a href={`https://www.imdb.com/title/${imdbId}`} target="_blank" rel="noopener noreferrer" style={{ marginLeft: 8 }}>
+            IMDB
+          </a>
+        )}
           {selectable && onCheck && (
             <label style={{ marginLeft: 'auto' }}>
               <input type="checkbox" checked={checked} onChange={e => onCheck(movie.id, e.target.checked)} /> Select

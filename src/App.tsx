@@ -3,6 +3,7 @@ import { fetchPopular, fetchSearch, fetchTrending } from './services/tmdb';
 import MovieList from './components/MovieList';
 import FavoritesPanel from './components/FavoritesPanel';
 import RecommendationPanel from './components/RecommendationPanel';
+import MovieDetails from './components/MovieDetails';
 
 const STORAGE_KEY = 'rf_favorites';
 
@@ -10,12 +11,14 @@ export default function App() {
   const [movies, setMovies] = useState<any[]>([]);
   const [query, setQuery] = useState('');
   const [favorites, setFavorites] = useState<any[]>([]);
+  const [languageFilter, setLanguageFilter] = useState('all');
   const [favMap, setFavMap] = useState<Record<number, any>>({});
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [recommendations, setRecommendations] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [selectedMovieId, setSelectedMovieId] = useState<number | null>(null);
 
   useEffect(() => {
     // Default to trending movies on the home page
@@ -34,6 +37,17 @@ export default function App() {
     const parsed = raw ? JSON.parse(raw) : [];
     setFavorites(parsed);
     setFavMap(Object.fromEntries(parsed.map((m: any) => [m.id, m])));
+  }, []);
+
+  useEffect(() => {
+    function handleHash() {
+      const h = window.location.hash || '';
+      const m = h.match(/^#\/movie\/(\d+)/);
+      if (m) setSelectedMovieId(Number(m[1])); else setSelectedMovieId(null);
+    }
+    handleHash();
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
   }, []);
 
   function persist(favs: any[]) {
@@ -142,18 +156,33 @@ export default function App() {
       <h1 className="app-title">RecoFilms<span style={{ fontSize: '1.2rem', color: 'var(--text-muted)', marginLeft: 16, fontWeight: 500 }}>Movie recommender</span></h1>
       <div className="main-layout">
         <div className="content-area">
+          {selectedMovieId ? (
+            <MovieDetails movieId={selectedMovieId!} onClose={() => { window.location.hash = ''; }} />
+          ) : (
+            <>
           <div className="search-bar">
             <input type="text" placeholder="Search movies by title" value={query} onChange={e => setQuery(e.target.value)} style={{ flex: 1 }} />
+            <select value={languageFilter} onChange={e => setLanguageFilter(e.target.value)} style={{ marginLeft: 12 }}>
+              <option value="all">All languages</option>
+              {Array.from(new Set(movies.map(m => m.original_language).filter(Boolean))).sort().map(code => (
+                <option key={code} value={code}>{code}</option>
+              ))}
+            </select>
             <button className="btn-primary" onClick={doSearch}>Search</button>
             <button className="btn-danger" onClick={() => { setQuery(''); loadPage(1, ''); }}>Clear</button>
           </div>
           <h2 className="section-title">{query ? `Search results for "${query}"` : 'Trending Movies'}</h2>
-          <MovieList movies={movies} favorites={favMap} onToggleFavorite={toggleFavorite} />
+          {(() => {
+            const filtered = languageFilter === 'all' ? movies : movies.filter(m => m.original_language === languageFilter);
+            return <MovieList movies={filtered} favorites={favMap} onToggleFavorite={toggleFavorite} />;
+          })()}
           <div className="pagination">
             <button onClick={() => gotoPage(page - 1)} disabled={page <= 1}>Prev</button>
             <span>Page {page} / {totalPages}</span>
             <button onClick={() => gotoPage(page + 1)} disabled={page >= totalPages}>Next</button>
           </div>
+            </>
+          )}
         </div>
         <div className="sidebar">
           <FavoritesPanel favorites={favorites} onToggleFavorite={toggleFavorite} selectedIds={selectedIds} onCheck={onCheck} onReset={resetFavorites} />
