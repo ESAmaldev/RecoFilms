@@ -16,7 +16,7 @@ dotenv.config();
 // Vercel serverless functions export the Express app directly; there is no
 // listening port or manual startup.  The platform will handle incoming
 // requests for us, so we drop the PORT and startServer boilerplate.
-const TMDB_KEY = process.env.TMDB_API_KEY || process.env.VITE_TMDB_API_KEY;
+const TMDB_KEY = process.env.TMDB_API_KEY ;
 
 if (!TMDB_KEY) {
   console.error('Missing TMDB_API_KEY in environment. Set TMDB_API_KEY and restart.');
