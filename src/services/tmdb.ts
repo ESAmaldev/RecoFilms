@@ -1,7 +1,10 @@
 const BASE = 'https://api.themoviedb.org/3';
 const IMG_BASE = 'https://image.tmdb.org/t/p/w342';
 
-const USE_PROXY = import.meta.env.VITE_USE_PROXY === 'true';
+// default to using the proxy unless explicitly turned off.  This ensures the
+// client doesn't accidentally hit TMDB without a key when the build variable
+// is missing.
+const USE_PROXY = import.meta.env.VITE_USE_PROXY !== 'false';
 
 function buildUrl(path: string, params: Record<string, string | number | undefined> = {}) {
   if (USE_PROXY) {

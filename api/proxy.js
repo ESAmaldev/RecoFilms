@@ -16,11 +16,13 @@ dotenv.config();
 // Vercel serverless functions export the Express app directly; there is no
 // listening port or manual startup.  The platform will handle incoming
 // requests for us, so we drop the PORT and startServer boilerplate.
-const TMDB_KEY = process.env.TMDB_API_KEY ;
+const TMDB_KEY = process.env.TMDB_API_KEY;
 
+// log key status for debugging (do **not** print the key itself in public logs)
+console.log('proxy startup: TMDB_KEY length =', TMDB_KEY ? TMDB_KEY.length : '<undefined>');
 if (!TMDB_KEY) {
   console.error('Missing TMDB_API_KEY in environment. Set TMDB_API_KEY and restart.');
-  // don't exit; allow the server to run in dev if direct client key used
+  // continue rather than exiting; local dev may hit TMDB directly
 }
 
 const app = express();
